@@ -39,11 +39,6 @@ stages :
     condition: ne('${{ parameters.Action }}', 'Destroy')
     jobs:
       - job: terraform_apply
-        env:
-          TF_VAR_admin_profile: '{
-            "admin_username": "$(adminUsername)",
-            "admin_password": "$(adminPassword)"
-          }'
         steps:
           - task: TerraformInstaller@0
             displayName: 'install'
@@ -68,6 +63,11 @@ stages :
               command: 'plan'
               environmentServiceNameAzureRM: '${{ variables.backendServiceArm }}'
               workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+            env:
+              TF_VAR_admin_profile: '{
+                "admin_username": "$(adminUsername)",
+                "admin_password": "$(adminPassword)"
+              }'
           - task: TerraformTaskV2@2
             displayName: 'apply'
             condition: and(succeeded(), eq(variables['Action'], 'Apply'))
@@ -76,6 +76,11 @@ stages :
               command: 'apply'
               environmentServiceNameAzureRM: '${{ variables.backendServiceArm }}'
               workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+            env:
+              TF_VAR_admin_profile: '{
+                "admin_username": "$(adminUsername)",
+                "admin_password": "$(adminPassword)"
+              }'
  
   - stage: terraform_destroy
     condition: contains('${{ parameters.Action }}', 'Destroy')
