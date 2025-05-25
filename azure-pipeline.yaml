@@ -31,12 +31,19 @@ variables:
     value: '1.0.10'
   - name: action
     value: ${{ parameters.Action }}
+  - name: adminUsername
+    value: admin
  
 stages :  
   - stage: terraform_plan_apply
     condition: ne('${{ parameters.Action }}', 'Destroy')
     jobs:
       - job: terraform_apply
+        env:
+          TF_VAR_admin_profile: '{
+            "admin_username": "$(adminUsername)",
+            "admin_password": "$(adminPassword)"
+          }'
         steps:
           - task: TerraformInstaller@0
             displayName: 'install'
@@ -87,6 +94,7 @@ stages :
               backendAzureRmContainerName: '${{ variables.backendAzureRmContainerName }}'
               backendAzureRmKey: '${{ variables.backendAzureRmKey }}'
               workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+            
           - task: TerraformTaskV2@2
             displayName: 'destroy'
             condition: and(succeeded(), eq(variables['action'], 'Destroy'))
