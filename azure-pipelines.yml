@@ -1,0 +1,120 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+name: Creating Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r) 
+
+trigger:
+- main
+
+# pr:
+#  branches:
+#   include:
+#     - main
+# pool:
+#   vmImage: ubuntu-latest
+
+parameters:
+  - name: Action
+    default: 'Plan'
+    values:
+      - Plan
+      - Apply 
+      - Destroy
+
+variables:
+ - name: backendServiceArm
+   value: 'AzureDevOps_sp_connection'
+ - name: backendResourceGroupName
+   value: 'puru-test-rg-01'
+ - name: backendStorageAccountName
+   value: 'purutfstate'
+ - name: backendContainerName
+   value: 'dev-tfstate'
+ - name: backendKey
+   value: 'dev.terraform.tfstate'
+ - name: workingDirectory
+   value: '$(System.DefaultWorkingDirectory)/Azure/'
+ - name: action
+   value: ${{ parameters.Action }}
+ - name: adminUsername
+   value: admin
+
+
+stages:
+  - stage: Terraform_Plan_Apply
+    displayName: 'Terraform Plan Apply'
+    condition: ne('${{ parameters.Action }}', 'Destroy')
+    jobs:
+      - job: terraform_apply
+        steps:
+          - task: TerraformInstaller@0
+            displayName: 'Install'
+            inputs:
+              terraformVersion: '1.0.10'
+          - task: TerraformTaskV3@3
+            displayName: 'Initialize Terraform'
+            inputs:
+              provider: azurerm
+              command: init
+              backendServiceArm: $(backendServiceArm)  # Service connection
+              backendAzureRmResourceGroupName: $(backendResourceGroupName)
+              backendAzureRmStorageAccountName: $(backendStorageAccountName)
+              backendAzureRmContainerName: $(backendContainerName)
+              backendAzureRmKey: $(backendKey)
+              workingDirectory: $(workingDirectory)
+          - task: TerraformTaskV3@3
+            displayName: 'Create Terraform Plan'
+            condition: and(succeeded(), eq(variables['Action'], 'Plan'))
+            inputs:
+              provider: 'azurerm'
+              command: 'plan'
+              #commandOptions: '-out dev.tfplan'
+              environmentServiceNameAzureRM: $(backendServiceArm)
+              workingDirectory: $(workingDirectory)
+            env:
+              TF_VAR_admin_profile: '{
+                "admin_username": "$(adminUsername)",
+                "admin_password": "$(adminPassword)"
+              }'
+          - task: TerraformTaskV3@3
+            condition: and(succeeded(), eq(variables['Action'], 'Apply'))
+            displayName: 'Apply Terraform Plan'
+            inputs:
+              provider: azurerm
+              command: apply
+              #commandOptions: 'dev.tfplan'
+              workingDirectory: $(workingDirectory)
+              environmentServiceNameAzureRM: $(backendServiceArm)
+            env:
+              TF_VAR_admin_profile: '{
+                "admin_username": "$(adminUsername)",
+                "admin_password": "$(adminPassword)"
+              }'
+  - stage: Terraform Destroy
+    jobs:
+      - job:
+        condition: contains('${{ parameters.Action }}', 'Destroy')
+        steps:
+          - task: TerraformTaskV3@3
+            displayName: 'Terraform Init'
+            inputs:
+              provider: azurerm
+              command: init
+              backendServiceArm: $(backendServiceArm)  # Service connection
+              backendAzureRmResourceGroupName: $(backendResourceGroupName)
+              backendAzureRmStorageAccountName: $(backendStorageAccountName)
+              backendAzureRmContainerName: $(backendContainerName)
+              backendAzureRmKey: $(backendKey)
+              workingDirectory: $(workingDirectory)
+          - task: TerraformTaskV3@3
+            displayName: 'Terraform Destroy'
+            inputs:
+              provider: azurerm 
+              command: destroy
+              environmentServiceNameAzureRM: $(backendServiceArm)
+              workingDirectory: $(workingDirectory)
+
+          
+
+
