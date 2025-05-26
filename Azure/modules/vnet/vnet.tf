@@ -33,7 +33,7 @@ resource "azurerm_network_interface" "mynic" {
   location            = var.location
   ip_configuration {
     name                          = var.ip_config_name
-    subnet_id                     = azurerm_subnet.mysubnet.name
+    subnet_id                     = azurerm_subnet.mysubnet.id
     private_ip_address_allocation = "Dynamic"
   }
   tags = var.tags
