@@ -22,9 +22,9 @@ variables:
   - name: backendAzureRmResourceGroupName
     value: 'puru-test-rg-01'  
   - name: backendAzureRmStorageAccountName
-    value: 'terraformtfState'
+    value: 'purutfstate'  # Storage account name
   - name: backendAzureRmContainerName
-    value: 'developtfstate'
+    value: 'dev-tfstate'
   - name: backendAzureRmKey
     value: 'dev.terraform.tfstate'
   - name: terraform_version
