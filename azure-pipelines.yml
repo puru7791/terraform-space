@@ -12,9 +12,9 @@ trigger:
 #   include:
 #     - main
 pool:
-  name: 'win self-hosted agents'
-  # demands:
-  #  - agent.name -equals DESKTOP-PU9ET9R
+  name: 'my-self-hosted'
+  demands:
+   - agent.name -equals ado-agent01
 
 parameters:
   - name: Action
