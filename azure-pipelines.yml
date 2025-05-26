@@ -11,8 +11,10 @@ trigger:
 #  branches:
 #   include:
 #     - main
-# pool:
-#   vmImage: ubuntu-latest
+pool:
+  name: 'win self-hosted agents'
+  # demands:
+  #  - agent.name -equals DESKTOP-PU9ET9R
 
 parameters:
   - name: Action
