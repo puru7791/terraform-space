@@ -31,7 +31,7 @@ parameters:
 
 variables:
  - name: backendServiceArm
-   value: 'azure-ado-connection'
+   value: 'azure-ado-connection-2'
  - name: backendResourceGroupName
    value: 'puru-test-rg-01'
  - name: backendStorageAccountName
