@@ -5,7 +5,10 @@
 name: Creating Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r) 
 
 trigger:
-- main
+  branches:
+  - main
+  - develop
+
 
 # pr:
 #  branches:
