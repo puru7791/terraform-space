@@ -45,7 +45,7 @@ variables:
  - name: action
    value: ${{ parameters.Action }}
  - name: adminUsername
-   value: admin
+   value: 'azureuser'
 
 
 stages:
