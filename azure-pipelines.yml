@@ -92,6 +92,7 @@ stages:
                 "admin_password": "$(adminPassword)"
               }'
   - stage: Terraform_Destroy
+    displayName: 'Terraform Destroy'
     jobs:
       - job:
         condition: contains('${{ parameters.Action }}', 'Destroy')
