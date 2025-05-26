@@ -100,9 +100,9 @@ stages:
               }'
   - stage: Terraform_Destroy
     displayName: 'Terraform Destroy'
+    condition: contains('${{ parameters.Action }}', 'Destroy')
     jobs:
       - job:
-        condition: eq('${{ parameters.Action }}', 'Destroy')
         steps:
           - task: TerraformTaskV3@3
             displayName: 'Terraform Init'
