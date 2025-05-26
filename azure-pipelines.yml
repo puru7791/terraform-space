@@ -4,10 +4,12 @@
 # https://aka.ms/yaml
 name: Creating Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r) 
 
-trigger:
-  branches:
-  - main
-  - develop
+trigger: 
+ branches:
+   include:
+     - main
+     - develop
+
 
 
 # pr:
