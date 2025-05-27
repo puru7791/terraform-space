@@ -30,22 +30,7 @@ variable "subnet_address_prefixes" {
   type = list(string)
 }
 
-# Variable for Network Security Group
 
-variable "nsg_name" {
-  type = string
-
-}
-
-# Network interface 
-
-variable "nic_name" {
-  type = string
-}
-
-variable "ip_config_name" {
-  type = string
-}
 
 variable "tags" {
   type = map(string)

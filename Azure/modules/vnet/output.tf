@@ -1,9 +1,9 @@
-output "network_interface_id" {
-  description = "The ID of the NIC"
-  value       = azurerm_network_interface.mynic.id
-}
-output "vnet_name" {
-  value = azurerm_virtual_network.myvnet.name
 
+output "vnet_id" {
+  value = azurerm_virtual_network.myvnet.id
+
+}
+output "subenet_id" {
+  value = azurerm_subnet.mysubnet.id
 }
 

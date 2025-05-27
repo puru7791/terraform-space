@@ -1,110 +1,121 @@
-name: $(BuildDefinitionName)_$(date:yyyyMMdd)$(rev:.r)
- 
-trigger:
-  - main
- 
-pr: none
- 
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+name: Creating Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r) 
+
+trigger: 
+ branches:
+   include:
+     - main
+
+# pr:
+#  branches:
+#   include:
+#     - main
+pool:
+  name: 'my-self-hosted'
+  demands:
+   - agent.name -equals ado-agent01
+
 parameters:
- 
   - name: Action
-    displayName: Action
-    type: string
     default: 'Plan'
     values:
-    - Plan
-    - Apply
-    - Destroy
- 
+      - Plan
+      - Apply 
+      - Destroy
+
 variables:
-  - name: backendServiceArm
-    value: 'AzureDevOps_sp_connection' #Service connection
-  - name: backendAzureRmResourceGroupName
-    value: 'puru-test-rg-01'  
-  - name: backendAzureRmStorageAccountName
-    value: 'purutfstate'  # Storage account name
-  - name: backendAzureRmContainerName
-    value: 'dev-tfstate'
-  - name: backendAzureRmKey
-    value: 'dev.terraform.tfstate'
-  - name: terraform_version
-    value: '1.0.10'
-  - name: action
-    value: ${{ parameters.Action }}
-  - name: adminUsername
-    value: admin
- 
-stages :  
-  - stage: terraform_plan_apply
+ - name: backendServiceArm
+   value: 'azure-ado-connection-2'
+ - name: backendResourceGroupName
+   value: 'puru-test-rg-01'
+ - name: backendStorageAccountName
+   value: 'purutfstate'
+ - name: backendContainerName
+   value: 'dev-tfstate'
+ - name: backendKey
+   value: 'dev.terraform.tfstate'
+ - name: workingDirectory
+   value: '$(System.DefaultWorkingDirectory)/Azure/'
+ - name: Action
+   value: ${{ parameters.Action }}
+ - name: adminUsername
+   value: 'azureuser'
+
+
+stages:
+  - stage: Terraform_Plan_Apply
+    displayName: 'Terraform Plan Apply'
     condition: ne('${{ parameters.Action }}', 'Destroy')
     jobs:
       - job: terraform_apply
         steps:
           - task: TerraformInstaller@0
-            displayName: 'install'
+            displayName: 'Install'
             inputs:
-              terraformVersion: '${{ variables.terraform_version }}'
-          - task: TerraformTaskV2@2
-            displayName: 'init'
+              terraformVersion: '1.0.10'
+          - task: TerraformTaskV3@3
+            displayName: 'Initialize Terraform'
             inputs:
-              provider: 'azurerm'
-              command: 'init'
-              backendServiceArm: '${{ variables.backendServiceArm }}' #
-              backendAzureRmResourceGroupName: '${{ variables.backendAzureRmResourceGroupName }}'
-              backendAzureRmStorageAccountName: '${{ variables.backendAzureRmStorageAccountName }}'
-              backendAzureRmContainerName: '${{ variables.backendAzureRmContainerName }}'
-              backendAzureRmKey: '${{ variables.backendAzureRmKey }}'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
-          - task: TerraformTaskV2@2
-            displayName: 'plan'
+              provider: azurerm
+              command: init
+              backendServiceArm: $(backendServiceArm)  # Service connection
+              backendAzureRmResourceGroupName: $(backendResourceGroupName)
+              backendAzureRmStorageAccountName: $(backendStorageAccountName)
+              backendAzureRmContainerName: $(backendContainerName)
+              backendAzureRmKey: $(backendKey)
+              workingDirectory: $(workingDirectory)
+          - task: TerraformTaskV3@3
+            displayName: 'Create Terraform Plan'
             condition: and(succeeded(), eq(variables['Action'], 'Plan'))
             inputs:
               provider: 'azurerm'
               command: 'plan'
-              environmentServiceNameAzureRM: '${{ variables.backendServiceArm }}'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+              #commandOptions: '-out dev.tfplan'
+              environmentServiceNameAzureRM: $(backendServiceArm)
+              workingDirectory: $(workingDirectory)
             env:
               TF_VAR_admin_profile: '{
                 "admin_username": "$(adminUsername)",
                 "admin_password": "$(adminPassword)"
               }'
-          - task: TerraformTaskV2@2
-            displayName: 'apply'
+          - task: TerraformTaskV3@3
             condition: and(succeeded(), eq(variables['Action'], 'Apply'))
+            displayName: 'Apply Terraform Plan'
             inputs:
-              provider: 'azurerm'
-              command: 'apply'
-              environmentServiceNameAzureRM: '${{ variables.backendServiceArm }}'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+              provider: azurerm
+              command: apply
+              #commandOptions: 'dev.tfplan'
+              workingDirectory: $(workingDirectory)
+              environmentServiceNameAzureRM: $(backendServiceArm)
             env:
               TF_VAR_admin_profile: '{
                 "admin_username": "$(adminUsername)",
                 "admin_password": "$(adminPassword)"
               }'
- 
-  - stage: terraform_destroy
+  - stage: Terraform_Destroy
+    displayName: 'Terraform Destroy'
     condition: contains('${{ parameters.Action }}', 'Destroy')
-    environment: approval-env
     jobs:
-      - job: terraform_destroy
+      - job: 
         steps:
-          - task: TerraformTaskV2@2
-            displayName: 'init'
+          - task: TerraformTaskV3@3
+            displayName: 'Terraform Init'
             inputs:
-              provider: 'azurerm'
-              command: 'init'
-              backendServiceArm: '${{ variables.backendServiceArm }}'
-              backendAzureRmResourceGroupName: '${{ variables.backendAzureRmResourceGroupName }}'
-              backendAzureRmStorageAccountName: '${{ variables.backendAzureRmStorageAccountName }}'
-              backendAzureRmContainerName: '${{ variables.backendAzureRmContainerName }}'
-              backendAzureRmKey: '${{ variables.backendAzureRmKey }}'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
-            
-          - task: TerraformTaskV2@2
-            displayName: 'destroy'
-            condition: and(succeeded(), eq(variables['action'], 'Destroy'))
+              provider: azurerm
+              command: init
+              backendServiceArm: $(backendServiceArm)  # Service connection
+              backendAzureRmResourceGroupName: $(backendResourceGroupName)
+              backendAzureRmStorageAccountName: $(backendStorageAccountName)
+              backendAzureRmContainerName: $(backendContainerName)
+              backendAzureRmKey: $(backendKey)
+              workingDirectory: $(workingDirectory)
+          - task: TerraformTaskV3@3
+            displayName: 'Terraform Destroy'
             inputs:
-              provider: 'azurerm'
-              command: 'destroy'
-              environmentServiceNameAzureRM: '${{ variables.backendServiceArm }}'
-              workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/'
+              provider: azurerm 
+              command: destroy
+              environmentServiceNameAzureRM: $(backendServiceArm)
+              workingDirectory: $(workingDirectory)

@@ -1,0 +1,121 @@
+parameters:
+  - name: Action
+    type:
+    default: ''
+  - name: environmentName
+    type: string
+    default: ''
+  - name: backendRG
+    type: string
+    default: ''
+  - name: backendSA
+    type: string
+    default: ''
+  - name: backendContainer
+    type: string
+    default: 'tfstate'
+  - name: backendKey
+    type: string
+    default: ''
+  - name: azureServiceConnection
+    type: string
+    default: ''
+    
+
+variables:
+ - name: action
+   value: ${{ parameters.Action }}
+ - name: adminUsername
+   value: 'azureuser'
+
+jobs:
+  - job: TerraformPlan
+    condition: ne('${{ parameters.Action }}', 'Destroy')
+    displayName: 'Terraform init -> validate -> plan (${{ parameters.environmentName }})'
+    steps:
+      - task: TerraformInstaller@1
+        displayName: 'Install'
+        inputs:
+            terraformVersion: 'latest'
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Init'
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          backendServiceArm: ${{ parameters.azureServiceConnection }}
+          backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
+          backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
+          backendAzureRmContainerName: ${{ parameters.backendContainer }}
+          backendAzureRmKey: ${{ parameters.backendKey }}
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Validate'
+        inputs:
+          provider: 'azurerm'
+          command: 'validate'
+          workingDirectory: 
+
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Plan'
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          commandOptions: >
+            -input=false -var=
+            -out "myplan-$(Build.BuildId)"
+          environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
+          
+      - task: CopyFiles@2
+        inputs:
+         SourceFolder: '$(System.DefaultWorkingDirectory)/Azure'
+         Contents: |
+           ** 
+         TargetFolder: '$(Build.ArtifactStagingDirectory)'
+         CleanTargetFolder: true
+      - publish: $(Build.ArtifactStagingDirectory)
+        artifact: terraform-plan-${{ parameters.environmentName }}
+      
+  - deployment: TerraformApply
+    dependsOn: TerraformPlan
+    displayName: 'Apply: ${{ parameters.environmentName }}'
+    environment: ${{ parameters.environmentName }}
+    workspace:
+      clean: all
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: TerraformInstaller@1
+             inputs:
+               terraformVersion: 'latest'
+           - task: TerraformTaskV3@3
+             inputs:
+               provider: 'azurerm'
+               command: 'apply'
+               commandOptions: 'myplan-$(Build.BuildId)'
+               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+               environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+  - deployment: TerraformDestroy
+    condition: contains('${{ parameters.Action }}', 'Destroy')
+    displayName: 'Destroy: ${{ parameters.environmentName }}'
+    environment: ${{ parameters.environmentName }}
+    workspace:
+      clean: all
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: TerraformInstaller@1
+             inputs:
+               terraformVersion: 'latest'
+           - task: TerraformTaskV3@3
+             inputs:
+               provider: 'azurerm'
+               command: 'destroy'
+               commandOptions: 'myplan-$(Build.BuildId)'
+               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+               environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+    
+    
+          

@@ -7,4 +7,5 @@ locals {
   ip_config_name  = "${var.prefix}-IpConfig"
   vm_name  = "${var.prefix}-vm01"
   diskName = "${var.prefix}ManagedDisk01"
+  pipName  = "${var.prefix}-pip"
 }
