@@ -61,7 +61,7 @@ stages:
     jobs:
       - job: terraform_apply
         steps:
-          - task: TerraformInstaller@0
+          - task: TerraformInstaller@1
             displayName: 'Install'
             inputs:
               terraformVersion: 'latest'
