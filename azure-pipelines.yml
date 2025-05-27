@@ -41,7 +41,7 @@ variables:
  - name: backendKey
    value: 'dev.terraform.tfstate'
  - name: workingDirectory
-   value: '$(System.DefaultWorkingDirectory)/Azure/'
+   value: '$(System.DefaultWorkingDirectory)/Azure'
  - name: Action
    value: ${{ parameters.Action }}
  - name: adminUsername
