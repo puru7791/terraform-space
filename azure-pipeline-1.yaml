@@ -27,7 +27,7 @@ stages:
           Action: ${{ parameters.Action }}
           environmentName: 'dev'
           backendRG: 'puru-test-rg-01'
-          backendSA: 'purutfstate'             #Backend Storage Account
+          backendSA: 'purutfstate'             # Backend Storage Account
           backendContainer: 'dev-tfstate'      # Backend Container
           backendKey: 'dev.terraform.tfstate'  # Backend Key
           azureServiceConnection: $(azureServiceConnection)  

@@ -7,14 +7,10 @@ tags = {
 location = "East US"
 address_spaces = [ "10.0.0.0/16" ]  #Vnet address space
 subnet_address_prefixes = [ "10.0.1.0/24" ]
-# # VM variables
-# vm_size = "Standard_B1s"
-# disk_size_gb = "20"
-# admin_profile = {
-#   "admin_username" = __admin_username__
-#   "admin_password" = __admin_password__
-# }
-
-rg_name = __resourceRG__
-subnet_name = __vnet_name__
-vnet_name = __subnet_name__
+# VM variables
+vm_size = "Standard_B1s"
+disk_size_gb = "20"
+admin_profile = {
+  "admin_username" = ""
+  "admin_password" = ""
+}

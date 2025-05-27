@@ -29,16 +29,11 @@ variable "subnet_address_prefixes" {
 
 }
 
-/*
+
 variable "vm_size" {
   type    = string
 
 }
-
-# variable "diskName" {
-#   description = "Name of the new managed disk."
-#   default     = "${var.prefix}ManagedDisk01"
-# }
 
 variable "disk_size_gb" {
 
@@ -47,23 +42,4 @@ variable "disk_size_gb" {
 variable "admin_profile" {
   description = "Mapping the admin user profiles"
   type        = map(string)
-  default = {
-    "admin_username" = ""
-    "admin_password" = ""
-  }
-
 }
-*/
-#############################
-# For testing
-variable "rg_name" {
-  type = string
-}
-variable "vnet_name" {
-  type = string
-  
-}
-variable "subnet_name" {
-  type = string
-}
-###########################
