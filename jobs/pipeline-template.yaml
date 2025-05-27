@@ -1,6 +1,5 @@
 parameters:
   - name: Action
-    type:
     default: ''
   - name: environmentName
     type: string
