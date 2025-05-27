@@ -64,7 +64,7 @@ stages:
           - task: TerraformInstaller@0
             displayName: 'Install'
             inputs:
-              terraformVersion: '1.0.10'
+              terraformVersion: 'latest'
           - task: TerraformTaskV3@3
             displayName: 'Initialize Terraform'
             inputs:
@@ -82,7 +82,7 @@ stages:
             inputs:
               provider: 'azurerm'
               command: 'plan'
-              #commandOptions: '-out dev.tfplan'
+              commandOptions: '--vars-file=dev.tfvars --out=terraform.tfplan'
               environmentServiceNameAzureRM: $(backendServiceArm)
               workingDirectory: $(workingDirectory)
             env:
@@ -91,12 +91,12 @@ stages:
                 "admin_password": "$(adminPassword)"
               }'
           - task: TerraformTaskV3@3
-            condition: and(succeeded(), eq(variables['Action'], 'Apply'))
+            condition: and(succeeded(), or(eq(variables['Action'], 'Plan'), eq(variables['Action'], 'Apply'))) #and(succeeded(), eq(variables['Action'], 'Apply'))
             displayName: 'Apply Terraform Plan'
             inputs:
               provider: azurerm
               command: apply
-              #commandOptions: 'dev.tfplan'
+              commandOptions: '--vars-file=dev.tfvars --out=terraform.tfplan'
               workingDirectory: $(workingDirectory)
               environmentServiceNameAzureRM: $(backendServiceArm)
             env:
