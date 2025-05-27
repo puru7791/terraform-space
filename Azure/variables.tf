@@ -6,13 +6,6 @@ variable "tags" {
   type = map(string)
 }
 
-###############################
-# variables for resource group
-# variable "rgname" {
-#   default = "${var.prefix}-rg"
-
-# }
-
 
 variable "location" {
   type = string
@@ -21,10 +14,6 @@ variable "location" {
 
 
 ## Variables for module Vnet
-# variable "vnet_name" {
-#   default = "${var.prefix}-vnet"
-
-# }
 
 variable "address_spaces" {
   type    = list(string)
@@ -34,16 +23,13 @@ variable "address_spaces" {
 ########################################
 # subnet variables
 
-# variable "subnet_name" {
-#   default = "${var.prefix}-subnet"
-# }
 
 variable "subnet_address_prefixes" {
   type    = list(string)
 
 }
 
-
+/*
 variable "vm_size" {
   type    = string
 
@@ -67,7 +53,7 @@ variable "admin_profile" {
   }
 
 }
-
+*/
 #############################
 # For testing
 variable "rg_name" {
