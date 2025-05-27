@@ -82,7 +82,9 @@ stages:
             inputs:
               provider: 'azurerm'
               command: 'plan'
-              commandOptions: '--vars-file="$(workingDirectory)/dev.tfvars" --out=terraform.tfplan'
+              commandOptions: > 
+                -vars-file="$(workingDirectory)/dev.tfvars" 
+                -out="terraform.tfplan"
               environmentServiceNameAzureRM: $(backendServiceArm)
               workingDirectory: $(workingDirectory)
             env:
@@ -96,7 +98,9 @@ stages:
             inputs:
               provider: azurerm
               command: apply
-              commandOptions: '--vars-file="$(workingDirectory)/dev.tfvars" --out=terraform.tfplan'
+              commandOptions: >
+                -vars-file="$(workingDirectory)/dev.tfvars" 
+                -out="terraform.tfplan"
               workingDirectory: $(workingDirectory)
               environmentServiceNameAzureRM: $(backendServiceArm)
             env:
