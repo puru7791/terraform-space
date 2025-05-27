@@ -33,5 +33,5 @@ stages:
           backendContainer: 'dev-tfstate'      # Backend Container
           backendKey: 'dev.terraform.tfstate'  # Backend Key
           azureServiceConnection: $(azureServiceConnection)
-          admin_username: $(adminUsername)
+          adminUsername: $(adminUsername)
           adminPassword: $(adminPassword)
