@@ -9,6 +9,8 @@ variables:
     value: 'azure-ado-connection-2'
   - name: Action
     value: ${{ parameters.Action }}
+  - name: adminUsername
+    value: 'azureuser'
 
 
 pool: 
@@ -30,4 +32,6 @@ stages:
           backendSA: 'purutfstate'             # Backend Storage Account
           backendContainer: 'dev-tfstate'      # Backend Container
           backendKey: 'dev.terraform.tfstate'  # Backend Key
-          azureServiceConnection: $(azureServiceConnection)  
+          azureServiceConnection: $(azureServiceConnection)
+          admin_username: $(adminUsername)
+          adminPassword: $(adminPassword)

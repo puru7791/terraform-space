@@ -20,13 +20,16 @@ parameters:
   - name: azureServiceConnection
     type: string
     default: ''
+  - name: adminUsername
+    default: ''
+  - name: adminPassword
+    type: string
+    default: ''
     
 
-variables:
- - name: action
-   value: ${{ parameters.Action }}
- - name: adminUsername
-   value: 'azureuser'
+# variables:
+#  - name: action
+#    value: ${{ parameters.Action }}
 
 jobs:
   - job: TerraformPlan
@@ -53,7 +56,7 @@ jobs:
         inputs:
           provider: 'azurerm'
           command: 'validate'
-          workingDirectory: 
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
 
       - task: TerraformTaskV3@3
         displayName: 'Terraform Plan'
@@ -61,8 +64,9 @@ jobs:
           provider: 'azurerm'
           command: 'plan'
           commandOptions: >
-            -input=false -var=
-            -out "myplan-$(Build.BuildId)"
+            -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+            -out="myplan-$(Build.BuildId)"
+            -var='admin_profile={ admin_username = ${{ parameters.adminUsername }}, admin_password = ${{ parameters.adminPassword }} }'
           environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
           workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
           
@@ -93,7 +97,10 @@ jobs:
              inputs:
                provider: 'azurerm'
                command: 'apply'
-               commandOptions: 'myplan-$(Build.BuildId)'
+               commandOptions: >
+                -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+                -out="myplan-$(Build.BuildId)"
+                -var='admin_profile={ admin_username = ${{ parameters.adminUsername }}, admin_password = ${{ parameters.adminPassword }} }'
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
                environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
   - deployment: TerraformDestroy
