@@ -85,6 +85,7 @@ stages:
               commandOptions: > 
                 -var-file="$(workingDirectory)/dev.tfvars" 
                 -out="terraform.tfplan"
+                -lock-timeout=300s
               environmentServiceNameAzureRM: $(backendServiceArm)
               workingDirectory: $(workingDirectory)
             env:
@@ -101,6 +102,7 @@ stages:
               commandOptions: >
                 -var-file="$(workingDirectory)/dev.tfvars" 
                 -out="terraform.tfplan"
+                -lock-timeout=300s
               workingDirectory: $(workingDirectory)
               environmentServiceNameAzureRM: $(backendServiceArm)
             env:
