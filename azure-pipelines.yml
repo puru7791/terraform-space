@@ -110,8 +110,12 @@ stages:
     jobs:
       - job: 
         steps:
+          - task: TerraformInstaller@0
+            displayName: 'Install'
+            inputs:
+              terraformVersion: '1.0.10'
           - task: TerraformTaskV3@3
-            displayName: 'Terraform Init'
+            displayName: 'Initialize Terraform'
             inputs:
               provider: azurerm
               command: init
