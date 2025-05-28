@@ -1,6 +1,7 @@
 trigger:
-
-
+  branches:
+    include:
+      - main
 parameters:
   - name: Action
     default: 'Plan_Apply'
@@ -12,7 +13,6 @@ variables:
     value: 'azure-ado-connection-2'
   - name: Action
     value: ${{ parameters.Action }}
-
 
 pool: 
  name: 'my-self-hosted'
@@ -34,7 +34,6 @@ stages:
           backendContainer: 'dev-tfstate'      # Backend Container
           backendKey: 'dev.terraform.tfstate'  # Backend Key
           azureServiceConnection: $(azureServiceConnection)
-
           adminPassword: $(adminPassword)
   # - stage: Destry Dev
   #   displayName: 'Destroy Dev'

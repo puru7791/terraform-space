@@ -93,7 +93,7 @@ jobs:
                terraformVersion: 'latest'
            - task: AzureCLI@2
              inputs:
-               azureSubscription: 'azure-ado-connection-2'
+               azureSubscription: ${{ parameters.azureServiceConnection }}
                scriptType: 'bash'
                scriptLocation: 'inlineScript'
                inlineScript: 'tree'
@@ -126,7 +126,6 @@ jobs:
              inputs:
                provider: 'azurerm'
                command: 'destroy'
-               commandOptions: 'myplan-$(Build.BuildId)'
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
                environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
     
