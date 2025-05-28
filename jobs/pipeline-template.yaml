@@ -100,7 +100,7 @@ jobs:
                provider: 'azurerm'
                command: 'apply'
                commandOptions: >
-                -var-file="$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/Azure/dev.tfvars"
+                -var-file="$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/dev.tfvars"
                 -input=false 
                 -var "admin_password=${{ parameters.adminPassword }}"
                 "myplan-$(Build.BuildId)"
