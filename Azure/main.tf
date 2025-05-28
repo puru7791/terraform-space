@@ -46,5 +46,9 @@ module "vm" {
   tags                  = var.tags
   diskName              = local.diskName
   disk_size_gb          = var.disk_size_gb
-  admin_profile         = var.admin_profile
+  vm_os_profile         = {
+    computer_name       = local.vm_name
+    admin_username      = "azureuser"
+    admin_password      = var.admin_password
+  }
 }

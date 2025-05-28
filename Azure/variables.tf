@@ -39,7 +39,8 @@ variable "disk_size_gb" {
 
 }
 
-variable "admin_profile" {
-  description = "Mapping the admin user profiles"
-  type        = map(string)
+variable "admin_password" {
+  type = string
+  sensitive = true
+  
 }
