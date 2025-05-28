@@ -120,11 +120,11 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-           - script: |
-               ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
-               tree -a $(pipeline.workspace)           
-           - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
-             displayName: "Ensure provider binaries are executable" 
+          #  - script: |
+          #      ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
+          #      tree -a $(pipeline.workspace)           
+          #  - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
+          #    displayName: "Ensure provider binaries are executable" 
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
