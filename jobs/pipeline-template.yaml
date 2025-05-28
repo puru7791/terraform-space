@@ -91,22 +91,19 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-           - task: TerraformTaskV3@3
-             displayName: 'Terraform Init'
-             inputs:
-               provider: 'azurerm'
-               command: 'init'
-               backendServiceArm: ${{ parameters.azureServiceConnection }}
-               backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
-               backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
-               backendAzureRmContainerName: ${{ parameters.backendContainer }}
-               backendAzureRmKey: ${{ parameters.backendKey }}
-               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
-           - script: tree $(pipeline.workspace)
-           - task: CmdLine@2
-             inputs:
-               script: 'tree'
-               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}' 
+          #  - task: TerraformTaskV3@3
+          #    displayName: 'Terraform Init'
+          #    inputs:
+          #      provider: 'azurerm'
+          #      command: 'init'
+          #      backendServiceArm: ${{ parameters.azureServiceConnection }}
+          #      backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
+          #      backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
+          #      backendAzureRmContainerName: ${{ parameters.backendContainer }}
+          #      backendAzureRmKey: ${{ parameters.backendKey }}
+          #      workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+           - script: tree -a $(pipeline.workspace)
+            
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
@@ -131,17 +128,17 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-           - task: TerraformTaskV3@3
-             displayName: 'Terraform Init'
-             inputs:
-               provider: 'azurerm'
-               command: 'init'
-               backendServiceArm: ${{ parameters.azureServiceConnection }}
-               backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
-               backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
-               backendAzureRmContainerName: ${{ parameters.backendContainer }}
-               backendAzureRmKey: ${{ parameters.backendKey }}
-               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+          #  - task: TerraformTaskV3@3
+          #    displayName: 'Terraform Init'
+          #    inputs:
+          #      provider: 'azurerm'
+          #      command: 'init'
+          #      backendServiceArm: ${{ parameters.azureServiceConnection }}
+          #      backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
+          #      backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
+          #      backendAzureRmContainerName: ${{ parameters.backendContainer }}
+          #      backendAzureRmKey: ${{ parameters.backendKey }}
+          #      workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
