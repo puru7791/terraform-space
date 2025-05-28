@@ -30,7 +30,7 @@ module "nic" {
   tags                    = var.tags
   rg_name                 = module.rg.rg_name
   location                = module.rg.location
-  subnet_id               = module.vnet.mysubnet.id
+  subnet_id               = module.vnet.subnet_id
   pip_name                = local.pipName
 }
 
