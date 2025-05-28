@@ -1,3 +1,6 @@
+trigger:
+
+
 parameters:
   - name: Action
     default: 'Plan_Apply'

@@ -91,12 +91,19 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
+           - task: AzureCLI@2
+             inputs:
+               azureSubscription: 'azure-ado-connection-2'
+               scriptType: 'bash'
+               scriptLocation: 'inlineScript'
+               inlineScript: 'tree'
+               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}' 
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
                command: 'apply'
                commandOptions: >
-                -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+                -var-file="$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/Azure/dev.tfvars"
                 -input=false 
                 -var "admin_password=${{ parameters.adminPassword }}"
                 "myplan-$(Build.BuildId)"
