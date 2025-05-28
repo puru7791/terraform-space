@@ -22,7 +22,7 @@ stages:
   # Dev Stage
   - stage: Dev
     displayName: 'Dev Deployment'
-    condition: ne('${{ parameters.Action }}', 'Destroy')
+    #condition: ne('${{ parameters.Action }}', 'Destroy')
     jobs:
       - template: jobs/pipeline-template.yaml
         parameters:
@@ -35,3 +35,6 @@ stages:
           azureServiceConnection: $(azureServiceConnection)
           adminUsername: $(adminUsername)
           adminPassword: $(adminPassword)
+  # - stage: Destry Dev
+  #   displayName: 'Destroy Dev'
+  #   condition: contains()
