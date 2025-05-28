@@ -92,9 +92,9 @@ jobs:
              inputs:
                terraformVersion: 'latest'
            - script: |
-               ls -lart --color $(pipeline.workspace)
-               tree $(pipeline.workspace)
-           - script: chmod -R +x $(pipeline.workspace)/.terraform/providers/
+               ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
+               tree -a $(pipeline.workspace)
+           - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
              displayName: "Ensure provider binaries are executable" 
            - task: TerraformTaskV3@3
              inputs:
@@ -121,9 +121,9 @@ jobs:
              inputs:
                terraformVersion: 'latest'
            - script: |
-               ls -lart --color $(pipeline.workspace)
-               tree $(pipeline.workspace)           
-           - script: chmod -R +x $(pipeline.workspace)/.terraform/providers/
+               ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
+               tree -a $(pipeline.workspace)           
+           - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
              displayName: "Ensure provider binaries are executable" 
            - task: TerraformTaskV3@3
              inputs:
