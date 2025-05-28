@@ -102,6 +102,7 @@ jobs:
                backendAzureRmContainerName: ${{ parameters.backendContainer }}
                backendAzureRmKey: ${{ parameters.backendKey }}
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+           - script: tree $(pipeline.workspace)
            - task: CmdLine@2
              inputs:
                script: 'tree'
