@@ -1,3 +1,5 @@
+name: '${{ parameters.Action }} Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r)' 
+
 trigger:
   branches:
     include:

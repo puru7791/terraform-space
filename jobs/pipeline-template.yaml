@@ -91,19 +91,11 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-          #  - task: TerraformTaskV3@3
-          #    displayName: 'Terraform Init'
-          #    inputs:
-          #      provider: 'azurerm'
-          #      command: 'init'
-          #      backendServiceArm: ${{ parameters.azureServiceConnection }}
-          #      backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
-          #      backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
-          #      backendAzureRmContainerName: ${{ parameters.backendContainer }}
-          #      backendAzureRmKey: ${{ parameters.backendKey }}
-          #      workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
-           - script: tree -a $(pipeline.workspace)
-            
+           - script: |
+               ls -lart --color
+               tree $(pipeline.workspace)
+           - script: chmod -R +x .terraform/providers/
+             displayName: "Ensure provider binaries are executable" 
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
@@ -128,17 +120,11 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-          #  - task: TerraformTaskV3@3
-          #    displayName: 'Terraform Init'
-          #    inputs:
-          #      provider: 'azurerm'
-          #      command: 'init'
-          #      backendServiceArm: ${{ parameters.azureServiceConnection }}
-          #      backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
-          #      backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
-          #      backendAzureRmContainerName: ${{ parameters.backendContainer }}
-          #      backendAzureRmKey: ${{ parameters.backendKey }}
-          #      workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+           - script: |
+               ls -lart --color
+               tree $(pipeline.workspace)           
+           - script: chmod -R +x .terraform/providers/
+             displayName: "Ensure provider binaries are executable" 
            - task: TerraformTaskV3@3
              inputs:
                provider: 'azurerm'
