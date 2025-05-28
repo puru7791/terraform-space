@@ -91,12 +91,9 @@ jobs:
            - task: TerraformInstaller@1
              inputs:
                terraformVersion: 'latest'
-           - task: AzureCLI@2
+           - task: CmdLine@2
              inputs:
-               azureSubscription: ${{ parameters.azureServiceConnection }}
-               scriptType: 'bash'
-               scriptLocation: 'inlineScript'
-               inlineScript: 'tree'
+               script: 'tree'
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}' 
            - task: TerraformTaskV3@3
              inputs:
