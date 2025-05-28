@@ -97,9 +97,9 @@ jobs:
                command: 'apply'
                commandOptions: >
                 -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
-                -out "myplan-$(Build.BuildId)"
                 -input=false 
-                -var "admin_password=${{ parameters.adminPassword }}" 
+                -var "admin_password=${{ parameters.adminPassword }}"
+                "myplan-$(Build.BuildId)"
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
                environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
   - deployment: TerraformDestroy
