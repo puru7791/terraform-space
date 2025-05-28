@@ -10,7 +10,7 @@ subnet_address_prefixes = [ "10.0.1.0/24" ]
 # VM variables
 vm_size = "Standard_B1s"
 disk_size_gb = "20"
-admin_profile = {
-  "admin_username" = ""
-  "admin_password" = ""
-}
+# admin_profile = {
+#   "admin_username" = ""
+#   "admin_password" = ""
+# }
