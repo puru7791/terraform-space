@@ -75,8 +75,13 @@ jobs:
            ** 
          TargetFolder: '$(Build.ArtifactStagingDirectory)'
          CleanTargetFolder: true
-      - publish: $(Build.ArtifactStagingDirectory)
-        artifact: terraform-plan-${{ parameters.environmentName }}
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: terraform-plan-${{ parameters.environmentName }}
+          publishLocation: 'Container'
+      # - publish: $(Build.ArtifactStagingDirectory)
+      #   artifact: terraform-plan-${{ parameters.environmentName }}
       
   - deployment: TerraformApply
     dependsOn: TerraformPlan
@@ -107,30 +112,7 @@ jobs:
                 "myplan-$(Build.BuildId)"
                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
                environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
-  - deployment: TerraformDestroy
-    condition: contains('${{ parameters.Action }}', 'Destroy')
-    displayName: 'Destroy: ${{ parameters.environmentName }}'
-    environment: ${{ parameters.environmentName }}
-    workspace:
-      clean: all
-    strategy:
-     runOnce:
-       deploy:
-         steps:
-           - task: TerraformInstaller@1
-             inputs:
-               terraformVersion: '1.6.6'
-          #  - script: |
-          #      ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
-          #      tree -a $(pipeline.workspace)           
-          #  - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
-          #    displayName: "Ensure provider binaries are executable" 
-           - task: TerraformTaskV3@3
-             inputs:
-               provider: 'azurerm'
-               command: 'destroy'
-               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
-               environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+  
     
     
           
