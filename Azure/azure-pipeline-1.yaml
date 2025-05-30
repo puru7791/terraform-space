@@ -10,6 +10,10 @@ parameters:
     values:
       - Plan_Apply
       - Destroy
+  - name: targetModules
+    displayName: 'Enter comma-separated module targets (e.g. module.rg,module.vm), leave blank to run all'
+    type: string
+    default: ''
 variables:
   - name: azureServiceConnection
     value: 'azure-ado-connection-2'
