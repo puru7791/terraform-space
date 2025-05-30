@@ -47,13 +47,13 @@ jobs:
           backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
           backendAzureRmContainerName: ${{ parameters.backendContainer }}
           backendAzureRmKey: ${{ parameters.backendKey }}
-          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
       - task: TerraformTaskV3@3
         displayName: 'Terraform Validate'
         inputs:
           provider: 'azurerm'
           command: 'validate'
-          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
 
       - task: TerraformTaskV3@3
         displayName: 'Terraform Plan'
@@ -61,16 +61,16 @@ jobs:
           provider: 'azurerm'
           command: 'plan'
           commandOptions: >
-            -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+            -var-file="$(System.DefaultWorkingDirectory)/Azure/terraform-code/dev.tfvars"
             -out "myplan-$(Build.BuildId)"
             -input=false 
             -var "admin_password=${{ parameters.adminPassword }}"
           environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
-          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
           
       - task: CopyFiles@2
         inputs:
-         SourceFolder: '$(System.DefaultWorkingDirectory)/Azure'
+         SourceFolder: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
          Contents: |
            ** 
          TargetFolder: '$(Build.ArtifactStagingDirectory)'
