@@ -137,7 +137,7 @@ jobs:
                 buildVersionToDownload: 'latest'
                 downloadType: 'single'
                 artifactName: 'terraform-plan-${{ parameters.environmentName }}'
-                downloadPath: '$(Pipeline.Workspace)'
+                downloadPath: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
             # - task: DownloadPipelineArtifact@2
             #   inputs:
             #     artifactName: 'terraform-plan-${{ parameters.environmentName }}'
