@@ -77,6 +77,16 @@ jobs:
          CleanTargetFolder: true
       - publish: $(Build.ArtifactStagingDirectory)
         artifact: terraform-plan-${{ parameters.environmentName }}
+      - task: UniversalPackages@0
+        inputs:
+          command: 'publish'
+          publishDirectory: '$(Build.ArtifactStagingDirectory)'
+          feedsToUsePublish: 'internal'
+          vstsFeedPublish: 'terraform-plan-artifacts'
+          vstsFeedPackagePublish: 'terraform-plan-${{ parameters.environmentName }}'
+          versionOption: 'custom'
+          versionPublish: '1.0.$(Build.BuildId)'
+      
       
   - deployment: TerraformApply
     dependsOn: TerraformPlan
@@ -118,10 +128,20 @@ jobs:
             - task: TerraformInstaller@1
               inputs:
                 terraformVersion: '1.6.6'
-            - task: DownloadPipelineArtifact@2
+
+            - task: DownloadBuildArtifacts@1
               inputs:
-                artifactName: 'terraform-plan-${{ parameters.environmentName }}'
-                downloadPath: '$(System.DefaultWorkingDirectory)'
+                buildType: 'specific'
+                project: 'Trialform-widget'
+                pipeline: 'Terraform Infrastructure Deployment'
+                buildVersionToDownload: 'latest'
+                downloadType: 'single'
+                artifactName: 'terraform-plan-dev'
+                downloadPath: '$(Pipeline.Workspace)'
+            # - task: DownloadPipelineArtifact@2
+            #   inputs:
+            #     artifactName: 'terraform-plan-${{ parameters.environmentName }}'
+            #     downloadPath: '$(System.DefaultWorkingDirectory)'
             - script: |
                ls -lart --color $(System.DefaultWorkingDirectory)
                tree -a $(pipeline.workspace)           
