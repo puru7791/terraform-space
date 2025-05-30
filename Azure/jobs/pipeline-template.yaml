@@ -77,15 +77,15 @@ jobs:
          CleanTargetFolder: true
       - publish: $(Build.ArtifactStagingDirectory)
         artifact: terraform-plan-${{ parameters.environmentName }}
-      - task: UniversalPackages@0
-        inputs:
-          command: 'publish'
-          publishDirectory: '$(Build.ArtifactStagingDirectory)'
-          feedsToUsePublish: 'internal'
-          vstsFeedPublish: 'terraform-plan-artifacts'
-          vstsFeedPackagePublish: 'terraform-plan-${{ parameters.environmentName }}'
-          versionOption: 'custom'
-          versionPublish: '1.0.$(Build.BuildId)'
+      # - task: UniversalPackages@0
+      #   inputs:
+      #     command: 'publish'
+      #     publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      #     feedsToUsePublish: 'internal'
+      #     vstsFeedPublish: 'terraform-plan-artifacts'
+      #     vstsFeedPackagePublish: 'terraform-plan-${{ parameters.environmentName }}'
+      #     versionOption: 'custom'
+      #     versionPublish: '1.0.$(Build.BuildId)'
       
       
   - deployment: TerraformApply
