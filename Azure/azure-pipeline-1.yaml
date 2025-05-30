@@ -1,9 +1,9 @@
 name: '${{ parameters.Action }} Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r)' 
 
-trigger:
-  branches:
-    include:
-      - main
+# trigger:
+#   branches:
+#     include:
+#       - main
 parameters:
   - name: Action
     default: 'Plan_Apply'
@@ -12,7 +12,7 @@ parameters:
       - Destroy
 variables:
   - name: azureServiceConnection
-    value: 'azure-ado-connection-2'
+    value: 'azure-ado-connection'
   - name: Action
     value: ${{ parameters.Action }}
 
