@@ -136,7 +136,7 @@ jobs:
                 pipeline: 'Terraform Infrastructure Deployment'
                 buildVersionToDownload: 'latest'
                 downloadType: 'single'
-                artifactName: 'terraform-plan-dev'
+                artifactName: 'terraform-plan-${{ parameters.environmentName }}'
                 downloadPath: '$(Pipeline.Workspace)'
             # - task: DownloadPipelineArtifact@2
             #   inputs:
