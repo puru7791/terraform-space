@@ -152,7 +152,7 @@ jobs:
                 provider: 'azurerm'
                 command: 'destroy'
                 commandOptions: >
-                  -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+                  -var-file="$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/dev.tfvars"
                   -input=false 
                   -var "admin_password=${{ parameters.adminPassword }}"
                 workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
