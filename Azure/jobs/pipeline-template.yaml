@@ -1,0 +1,163 @@
+parameters:
+  - name: Action
+    default: ''
+  - name: environmentName
+    type: string
+    default: ''
+  - name: backendRG
+    type: string
+    default: ''
+  - name: backendSA
+    type: string
+    default: ''
+  - name: backendContainer
+    type: string
+    default: 'tfstate'
+  - name: backendKey
+    type: string
+    default: ''
+  - name: azureServiceConnection
+    type: string
+    default: ''
+  - name: adminPassword
+    type: string
+    default: ''
+    
+
+# variables:
+#  - name: adminPassword
+#    value: ${{ parameters.adminPassword }}
+
+jobs:
+  - job: TerraformPlan
+    condition: ne('${{ parameters.Action }}', 'Destroy')
+    displayName: 'Terraform init -> validate -> plan (${{ parameters.environmentName }})'
+    steps:
+      - task: TerraformInstaller@1
+        displayName: 'Install'
+        inputs:
+            terraformVersion: '1.6.6'
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Init'
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          backendServiceArm: ${{ parameters.azureServiceConnection }}
+          backendAzureRmResourceGroupName: ${{ parameters.backendRG }}
+          backendAzureRmStorageAccountName: ${{ parameters.backendSA }}
+          backendAzureRmContainerName: ${{ parameters.backendContainer }}
+          backendAzureRmKey: ${{ parameters.backendKey }}
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Validate'
+        inputs:
+          provider: 'azurerm'
+          command: 'validate'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
+
+      - task: TerraformTaskV3@3
+        displayName: 'Terraform Plan'
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          commandOptions: >
+            -var-file="$(System.DefaultWorkingDirectory)/Azure/terraform-code/dev.tfvars"
+            -out "myplan-$(Build.BuildId)"
+            -input=false 
+            -var "admin_password=${{ parameters.adminPassword }}"
+          environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+          workingDirectory: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
+          
+      - task: CopyFiles@2
+        inputs:
+         SourceFolder: '$(System.DefaultWorkingDirectory)/Azure/terraform-code'
+         Contents: |
+           ** 
+         TargetFolder: '$(Build.ArtifactStagingDirectory)'
+         CleanTargetFolder: true
+      - publish: $(Build.ArtifactStagingDirectory)
+        artifact: terraform-plan-${{ parameters.environmentName }}
+      # - task: UniversalPackages@0
+      #   inputs:
+      #     command: 'publish'
+      #     publishDirectory: '$(Build.ArtifactStagingDirectory)'
+      #     feedsToUsePublish: 'internal'
+      #     vstsFeedPublish: 'terraform-plan-artifacts'
+      #     vstsFeedPackagePublish: 'terraform-plan-${{ parameters.environmentName }}'
+      #     versionOption: 'custom'
+      #     versionPublish: '1.0.$(Build.BuildId)'
+      
+      
+  - deployment: TerraformApply
+    dependsOn: TerraformPlan
+    displayName: 'Apply: ${{ parameters.environmentName }}'
+    environment: ${{ parameters.environmentName }}
+    workspace:
+      clean: all
+    strategy:
+     runOnce:
+       deploy:
+         steps:
+           - task: TerraformInstaller@1
+             inputs:
+               terraformVersion: '1.6.6'
+                # A deployment job has the default first step to -download: current
+                # which downloads the artifacts into $(Pipeline.Workspace)/artifactsAlias
+           - script: |
+               ls -lart --color $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}
+               tree -a $(pipeline.workspace)
+           - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
+             displayName: "Ensure provider binaries are executable" 
+           - task: TerraformTaskV3@3
+             inputs:
+               provider: 'azurerm'
+               command: 'apply'
+               commandOptions: "myplan-$(Build.BuildId)"
+               workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+               environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+  - deployment: TerraformDestroy
+    condition: contains('${{ parameters.Action }}', 'Destroy')
+    displayName: 'Destroy: ${{ parameters.environmentName }}'
+    environment: ${{ parameters.environmentName }}
+    workspace:
+      clean: all
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - task: TerraformInstaller@1
+              inputs:
+                terraformVersion: '1.6.6'
+
+            - task: DownloadBuildArtifacts@1
+              inputs:
+                buildType: 'specific'
+                project: 'Trialform-widget'
+                pipeline: 'Terraform Infrastructure Deployment'
+                buildVersionToDownload: 'latest'
+                downloadType: 'single'
+                artifactName: 'terraform-plan-${{ parameters.environmentName }}'
+                downloadPath: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+            # - task: DownloadPipelineArtifact@2
+            #   inputs:
+            #     artifactName: 'terraform-plan-${{ parameters.environmentName }}'
+            #     downloadPath: '$(System.DefaultWorkingDirectory)'
+            - script: |
+               ls -lart --color $(System.DefaultWorkingDirectory)
+               tree -a $(pipeline.workspace)           
+            - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
+              displayName: "Ensure provider binaries are executable" 
+            - task: TerraformTaskV3@3
+              inputs:
+                provider: 'azurerm'
+                command: 'destroy'
+                commandOptions: >
+                  -var-file="$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/dev.tfvars"
+                  -input=false 
+                  -var "admin_password=${{ parameters.adminPassword }}"
+                workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
+                environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
+  
+    
+    
+          

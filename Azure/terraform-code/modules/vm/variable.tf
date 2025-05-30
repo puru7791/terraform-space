@@ -26,7 +26,7 @@ variable "disk_type" {
   default     = "Standard_LRS"
 }
 
-variable "admin_profile" {
+variable "vm_os_profile" {
   description = "Map of Admin user profiles"
   type        = map(string)
 

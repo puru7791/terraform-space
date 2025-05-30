@@ -1,0 +1,42 @@
+name: '${{ parameters.Action }} Azure Infrastructure__$(date:yyyyMMdd)$(rev:.r)' 
+
+# trigger:
+#   branches:
+#     include:
+#       - main
+parameters:
+  - name: Action
+    default: 'Plan_Apply'
+    values:
+      - Plan_Apply
+      - Destroy
+variables:
+  - name: azureServiceConnection
+    value: 'azure-ado-connection'
+  - name: Action
+    value: ${{ parameters.Action }}
+
+pool: 
+ name: 'my-self-hosted'
+ demands:
+  - agent.name -equals ado-agent01
+
+stages:
+  # Dev Stage
+  - stage: Dev
+    displayName: 'Dev Deployment'
+    #condition: ne('${{ parameters.Action }}', 'Destroy')
+    jobs:
+      - template: jobs/pipeline-template.yaml
+        parameters:
+          Action: ${{ parameters.Action }}
+          environmentName: 'dev'
+          backendRG: 'puru-test-rg-01'
+          backendSA: 'purutfstate'             # Backend Storage Account
+          backendContainer: 'dev-tfstate'      # Backend Container
+          backendKey: 'dev.terraform.tfstate'  # Backend Key
+          azureServiceConnection: $(azureServiceConnection)
+          adminPassword: $(adminPassword)
+  # - stage: Destry Dev
+  #   displayName: 'Destroy Dev'
+  #   condition: contains()
