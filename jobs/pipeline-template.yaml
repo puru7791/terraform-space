@@ -145,12 +145,16 @@ jobs:
             - script: |
                ls -lart --color $(System.DefaultWorkingDirectory)
                tree -a $(pipeline.workspace)           
-          #  - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
-          #    displayName: "Ensure provider binaries are executable" 
+            - script: chmod -R +x $(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}/.terraform/providers/
+              displayName: "Ensure provider binaries are executable" 
             - task: TerraformTaskV3@3
               inputs:
                 provider: 'azurerm'
                 command: 'destroy'
+                commandOptions: >
+                  -var-file="$(System.DefaultWorkingDirectory)/Azure/dev.tfvars"
+                  -input=false 
+                  -var "admin_password=${{ parameters.adminPassword }}"
                 workingDirectory: '$(Pipeline.Workspace)/terraform-plan-${{ parameters.environmentName }}'
                 environmentServiceNameAzureRM: ${{ parameters.azureServiceConnection }}
   
