@@ -73,7 +73,8 @@ jobs:
     
     - name: Terraform Validate
       run: terraform validate -no-color
-
+    - name: List files
+      run: ls -lart
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: tf-plan
