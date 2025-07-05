@@ -70,7 +70,7 @@ jobs:
       continue-on-error: true
     
     - name: Terraform Validate
-      run: terrafrom validate -no-color
+      run: terraform validate -no-color
 
     # Generates an execution plan for Terraform
     - name: Terraform Plan
