@@ -29,6 +29,7 @@ on:
         required: true
 
 permissions:
+  id-token: write
   contents: read
 env:
   what_resource: ${{ github.event.inputs.ResourceName }}
