@@ -78,7 +78,18 @@ jobs:
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: tf-plan
-      run: terraform plan -var-file="${{ inputs.environment }}.tfvars" -input=false -out ${{ env.what_resource }}plan-${{ github.run_number }}
+      run: |
+        export exitcode=0
+        terraform plan -var-file="${{ inputs.environment }}.tfvars" -detailed-exitcode -no-color -out ${{ env.what_resource }}-plan-${{ github.run_number }} || export exitcode=$?
+
+        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+        
+        if [ $exitcode -eq 1 ]; then
+          echo Terraform Plan Failed!
+          exit 1
+        else 
+          exit 0
+        fi
       env:
         TF_VAR_clientId: "${{ secrets.AZURE_CLIENT_ID }}"
         TF_VAR_clientSecret: "${{ secrets.AZURE_CLIENT_SECRET }}"
@@ -86,18 +97,36 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: '${{ env.what_resource }}-${{ github.run_number }}'
+        name: ${{ env.what_resource }}-plan-${{ github.run_number }}
         path: ${{ github.workspace }}/*
         if-no-files-found: error
         include-hidden-files: true
-      
+    
+    # Create string output of Terraform Plan
+    - name: Create String Output
+      id: tf-plan-string
+      run: |
+        TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+        
+        delimiter="$(openssl rand -hex 8)"
+        echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+        echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+        echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo '```terraform' >> $GITHUB_OUTPUT
+        echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+        echo '```' >> $GITHUB_OUTPUT
+        echo "</details>" >> $GITHUB_OUTPUT
+        echo "${delimiter}" >> $GITHUB_OUTPUT
+
+
     - name: List files
       run: |
         pwd
         ls -lart
       # On push to "main", build or change infrastructure according to Terraform configuration files
       # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Terraform Apply
-      #if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-      run: terraform apply -auto-approve -input=false ${{ env.what_resource }}-${{ github.run_number }}
+    # - name: Terraform Apply
+    #   #if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
+    #   run: terraform apply -auto-approve -input=false ${{ env.what_resource }}-plan-${{ github.run_number }}
 
