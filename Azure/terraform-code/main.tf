@@ -56,7 +56,7 @@ module "vm" {
 module "aks" {
   source = "./modules/aks"
   clusterName = local.clusterName
-  dns_prefix = var.dns_prefix
+  dns_prefix = local.dns_prefix
   rg_name = module.rg.rg_name
   location = module.rg.location
   clientId = var.clientId
