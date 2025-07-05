@@ -61,6 +61,9 @@ variable "clientId" {
 variable "clientSecret" {
   
 }
+variable "tenant_id" {
+  
+}
 variable "defaultPoolVm_size" {
   
 }

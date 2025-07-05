@@ -19,6 +19,7 @@ on:
       environment: 
         description: 'Choose the deployment environment'
         type: choice
+        required: true
         default: 'dev'
         options:
           - dev
@@ -27,6 +28,7 @@ on:
         description: 'What resource you are trying to create'
         type: string
         required: true
+        default: 'aks'
 
 permissions:
   id-token: write
@@ -61,7 +63,7 @@ jobs:
 
     # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
     - name: Terraform Init
-      run: terraform init
+      run: terraform init -upgrade
       #working-directory: ${{ github.workspace }}/Azure/terraform-code
 
     # Checks that all Terraform configuration files adhere to a canonical format
@@ -76,7 +78,10 @@ jobs:
     - name: Terraform Plan
       id: tf-plan
       run: terraform plan -vars-file='**/${{ github.event.inputs.environment }}.tfvars' -input=false -out '${{ env.what_resource }}-${{ github.run_number }}'
-    
+      env:
+        TF_VAR_clientId: "${{ secrets.AZURE_CLIENT_ID }}"
+        TF_VAR_clientSecret: "${{ secrets.AZURE_CLIENT_SECRET }}"
+        TF_VAR_tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:

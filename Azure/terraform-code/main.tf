@@ -62,4 +62,5 @@ module "aks" {
   clientId = var.clientId
   clientSecret = var.clientSecret
   defaultPoolVm_size = var.defaultPoolVm_size
+  tenant_id = var.tenant_id
 }
