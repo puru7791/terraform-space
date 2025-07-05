@@ -52,17 +52,17 @@ variable "admin_password" {
 # variable "clusterName" {
 #   type = string
 # }
-variable "dns_prefix" {
-  
-}
 variable "clientId" {
-  
+  type = string
+  sensitive = true
 }
 variable "clientSecret" {
-  
+  type = string
+  sensitive = true
 }
 variable "tenant_id" {
-  
+  type = string
+  sensitive = true
 }
 variable "defaultPoolVm_size" {
   

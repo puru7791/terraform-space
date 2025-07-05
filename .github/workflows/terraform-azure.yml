@@ -10,41 +10,48 @@ name: 'Build Azure Infra'
 on:
   push: 
     branches: 
-      - develop-actions
+      - main
     paths: 
       - '**.tf'
       - '.github/workflows/*'
-  workflow_dispatch: 
-    inputs:
-      environment: 
-        description: 'Choose the deployment environment'
-        type: choice
-        required: true
-        default: 'dev'
-        options:
-          - dev
-          - production 
-      ResourceName:
-        description: 'What resource you are trying to create'
-        type: string
-        required: true
-        default: 'aks'
-
+  pull_request: 
+    branches: 
+      - main
+  # workflow_dispatch: 
+  #   inputs:
+  #     environment: 
+  #       description: 'Choose the deployment environment'
+  #       type: choice
+  #       required: true
+  #       default: 'dev'
+  #       options:
+  #         - dev
+  #         - production 
+  #     ResourceName:
+  #       description: 'What resource you are trying to create'
+  #       type: string
+  #       required: true
+  #       default: 'aks'
+run-name: 'Azure Infra - Run ID: ${{ github.run_id }} - by @${{ github.actor }}'
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
+
 env:
-  what_resource: ${{ github.event.inputs.ResourceName }}
+  what_resource: 'aks'  #${{ inputs.ResourceName }}
   #These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
   ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
   ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_OIDC: true
+  envName: "dev"
 jobs:
-  terraform-validate-plan:
+  terraform-plan:
     name: 'Terraform Validate and Plan'
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    outputs:
+      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -73,11 +80,23 @@ jobs:
     
     - name: Terraform Validate
       run: terraform validate -no-color
-
+    - name: List files
+      run: ls -lart
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: tf-plan
-      run: terraform plan -vars-file='${{ github.event.inputs.environment }}.tfvars' -input=false -out '${{ env.what_resource }}-${{ github.run_number }}'
+      run: |
+        export exitcode=0
+        terraform plan -var-file="${{ env.envName }}.tfvars" -detailed-exitcode -no-color -out ${{ env.what_resource }}-plan-${{ github.run_number }} || export exitcode=$?
+
+        echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
+        
+        if [ $exitcode -eq 1 ]; then
+          echo Terraform Plan Failed!
+          exit 1
+        else 
+          exit 0
+        fi
       env:
         TF_VAR_clientId: "${{ secrets.AZURE_CLIENT_ID }}"
         TF_VAR_clientSecret: "${{ secrets.AZURE_CLIENT_SECRET }}"
@@ -85,12 +104,77 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: '${{ env.what_resource }}-${{ github.run_number }}'
-        path: Terraform-plans/'${{ env.what_resource }}-${{ github.run_number }}'
+        name: ${{ env.what_resource }}-plan-${{ github.run_number }}
+        path: ${{ github.workspace }}/*
+        if-no-files-found: error
+        include-hidden-files: true
+    
+    # Create string output of Terraform Plan
+    - name: Create String Output
+      id: tf-plan-string
+      run: |
+        TERRAFORM_PLAN=$(terraform show -no-color ${{ env.what_resource }}-plan-${{ github.run_number }})
+        
+        delimiter="$(openssl rand -hex 8)"
+        echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+        echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+        echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo '```terraform' >> $GITHUB_OUTPUT
+        echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+        echo '```' >> $GITHUB_OUTPUT
+        echo "</details>" >> $GITHUB_OUTPUT
+        echo "${delimiter}" >> $GITHUB_OUTPUT
 
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    # If this is a PR post the changes
+    - name: Push Terraform Output to PR
+      if: github.ref != 'refs/heads/main'
+      uses: actions/github-script@v7
+      env:
+        SUMMARY: "${{ steps.tf-plan-string.outputs.summary }}"
+      with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const body = `${process.env.SUMMARY}`;
+            github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+            })
+  terraform-apply:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    environment: dev #${{ inputs.environment }}
+    if: github.ref == 'refs/heads/main' && needs.terraform-plan.outputs.tfplanExitCode == 2
+    needs: [terraform-plan]
+
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/Azure/terraform-code
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    # Download the saved plan artifacts
+    - name: 'Download Plan Artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.what_resource }}-plan-${{ github.run_number }}
+    
+    # List all files
+    - name: List files
+      run: |
+        pwd
+        ls -lart
+      
+    # Terraform Apply 
     - name: Terraform Apply
-      #if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-      run: terraform apply '${{ env.what_resource }}-${{ github.run_number }}' -auto-approve -input=false
+      run: terraform apply -auto-approve -input=false ${{ env.what_resource }}-plan-${{ github.run_number }}
 
