@@ -52,9 +52,6 @@ variable "admin_password" {
 # variable "clusterName" {
 #   type = string
 # }
-variable "dns_prefix" {
-  
-}
 variable "clientId" {
   
 }
