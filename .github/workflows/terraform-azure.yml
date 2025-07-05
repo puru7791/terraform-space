@@ -78,7 +78,7 @@ jobs:
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: tf-plan
-      run: terraform plan -vars-file='${{ github.event.inputs.environment }}.tfvars' -input=false -out '${{ env.what_resource }}-${{ github.run_number }}'
+      run: terraform plan -vars-file=${{ github.event.inputs.environment }}.tfvars -input=false -out ${{ env.what_resource }}plan-${{ github.run_number }}
       env:
         TF_VAR_clientId: "${{ secrets.AZURE_CLIENT_ID }}"
         TF_VAR_clientSecret: "${{ secrets.AZURE_CLIENT_SECRET }}"
