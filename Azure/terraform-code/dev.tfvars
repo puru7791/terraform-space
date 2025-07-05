@@ -10,3 +10,7 @@ subnet_address_prefixes = [ "10.0.1.0/24" ]
 # VM variables
 vm_size                 = "Standard_B1s"
 disk_size_gb            = "20"
+
+# Variable for AKS Cluster 
+defaultPoolVm_size = "Standard_D2_v2"
+

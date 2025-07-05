@@ -7,7 +7,7 @@ module "rg" {
 }
 
 #Module Azure Virtual Network
-
+/*
 module "vnet" {
   source                  = "./modules/vnet"
   vnet_name               = local.vnet_name
@@ -51,4 +51,15 @@ module "vm" {
     admin_username      = "azureuser"
     admin_password      = var.admin_password
   }
+}
+*/
+module "aks" {
+  source = "./modules/aks"
+  clusterName = local.clusterName
+  dns_prefix = var.dns_prefix
+  rg_name = module.rg.rg_name
+  location = module.rg.location
+  clientId = var.clientId
+  clientSecret = var.clientSecret
+  defaultPoolVm_size = var.defaultPoolVm_size
 }

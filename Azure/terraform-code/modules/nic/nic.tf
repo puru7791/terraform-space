@@ -32,8 +32,36 @@ resource "azurerm_network_security_group" "my-nsg" {
   resource_group_name = var.rg_name
   location            = var.location
   tags                = var.tags
+  security_rule {
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
+# NSG Rules
+/*
+resource "azurerm_network_security_rule" "test" {
+  count                       = "${length(var.inbound_port_ranges)}"
+  name                        = "sg-rule-${count.index}"
+  resource_group_name         = var.rg_name
+  network_security_group_name = azurerm_network_security_group.my-nsg.name
+  direction                   = "Inbound"
+  access                      = "Allow"
+  priority                    = "(100 * (${count.index} + 1))"
+  source_address_prefix       = "*"
+  source_port_range           = "*"
+  destination_address_prefix  = "*"
+  destination_port_range      = "${element(var.inbound_port_ranges, count.index)}"
+  protocol                    = "TCP"
+}
+*/
 # Nsg assiciation to NIC
 
 resource "azurerm_network_interface_security_group_association" "nsg-nic-assiciation" {

@@ -10,8 +10,15 @@ terraform {
       version = "~> 3.0.0"
     }
   }
-  backend "azurerm" {}
+  backend "azurerm" {
+    resource_group_name  = "rg-terraform-github-actions-state"
+    storage_account_name = "tfgithubactionstate"
+    container_name       = "tfstate"
+    key                  = "dev.terraform.tfstate"
+    use_oidc             = true
+  }
 }
 provider "azurerm" {
   features {}  # <-- REQUIRED
+  use_oidc = true
 }

@@ -12,24 +12,25 @@ variable "location" {
 
 }
 
-
-## Variables for module Vnet
-
+/*
+######################################## 
+#Variables for module Vnet
+########################################
 variable "address_spaces" {
   type    = list(string)
 
 }
 
-########################################
 # subnet variables
-
 
 variable "subnet_address_prefixes" {
   type    = list(string)
 
 }
 
-
+########################################
+# Variables for module VM
+########################################
 variable "vm_size" {
   type    = string
 
@@ -42,5 +43,24 @@ variable "disk_size_gb" {
 variable "admin_password" {
   type = string
   sensitive = true
+  
+}
+*/
+#######################################
+# AKS Module Variable Definitions
+#######################################
+# variable "clusterName" {
+#   type = string
+# }
+variable "dns_prefix" {
+  
+}
+variable "clientId" {
+  
+}
+variable "clientSecret" {
+  
+}
+variable "defaultPoolVm_size" {
   
 }
