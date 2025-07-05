@@ -15,10 +15,8 @@ terraform {
     storage_account_name = "tfgithubactionstate"
     container_name       = "tfstate"
     key                  = "dev.terraform.tfstate"
-    #use_oidc             = true
   }
 }
 provider "azurerm" {
   features {}  # <-- REQUIRED
-  use_oidc = true
 }
