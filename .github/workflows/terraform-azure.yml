@@ -8,43 +8,48 @@
 name: 'Build Azure Infra'
 
 on:
-  # push: 
-  #   branches: 
-  #     - develop-actions
-  #   paths: 
-  #     - '**.tf'
-  #     - '.github/workflows/*'
-  workflow_dispatch: 
-    inputs:
-      environment: 
-        description: 'Choose the deployment environment'
-        type: choice
-        required: true
-        default: 'dev'
-        options:
-          - dev
-          - production 
-      ResourceName:
-        description: 'What resource you are trying to create'
-        type: string
-        required: true
-        default: 'aks'
-run-name: 'Azure ${{ inputs.environment  }} Infra - Run ID: ${{ github.run_id }} - by @${{ github.actor }}'
+  push: 
+    branches: 
+      - main
+    paths: 
+      - '**.tf'
+      - '.github/workflows/*'
+  pull_request: 
+    branches: 
+      - main
+  # workflow_dispatch: 
+  #   inputs:
+  #     environment: 
+  #       description: 'Choose the deployment environment'
+  #       type: choice
+  #       required: true
+  #       default: 'dev'
+  #       options:
+  #         - dev
+  #         - production 
+  #     ResourceName:
+  #       description: 'What resource you are trying to create'
+  #       type: string
+  #       required: true
+  #       default: 'aks'
+run-name: 'Azure Infra - Run ID: ${{ github.run_id }} - by @${{ github.actor }}'
 permissions:
   id-token: write
   contents: read
+
 env:
-  what_resource: ${{ inputs.ResourceName }}
+  what_resource: 'aks'  #${{ inputs.ResourceName }}
   #These environment variables are used by the terraform azure provider to setup OIDD authenticate. 
   ARM_CLIENT_ID: "${{ secrets.AZURE_CLIENT_ID }}"
   ARM_SUBSCRIPTION_ID: "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_OIDC: true
+  envName: "dev"
 jobs:
   terraform-validate-plan:
     name: 'Terraform Validate and Plan'
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: dev #${{ inputs.environment }}
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -80,7 +85,7 @@ jobs:
       id: tf-plan
       run: |
         export exitcode=0
-        terraform plan -var-file="${{ inputs.environment }}.tfvars" -detailed-exitcode -no-color -out ${{ env.what_resource }}-plan-${{ github.run_number }} || export exitcode=$?
+        terraform plan -var-file="${{ env.envName }}.tfvars" -detailed-exitcode -no-color -out ${{ env.what_resource }}-plan-${{ github.run_number }} || export exitcode=$?
 
         echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
         
