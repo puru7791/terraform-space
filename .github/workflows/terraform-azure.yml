@@ -36,6 +36,7 @@ run-name: 'Azure Infra - Run ID: ${{ github.run_id }} - by @${{ github.actor }}'
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 env:
   what_resource: 'aks'  #${{ inputs.ResourceName }}
