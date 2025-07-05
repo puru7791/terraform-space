@@ -53,13 +53,16 @@ variable "admin_password" {
 #   type = string
 # }
 variable "clientId" {
-  
+  type = string
+  sensitive = true
 }
 variable "clientSecret" {
-  
+  type = string
+  sensitive = true
 }
 variable "tenant_id" {
-  
+  type = string
+  sensitive = true
 }
 variable "defaultPoolVm_size" {
   

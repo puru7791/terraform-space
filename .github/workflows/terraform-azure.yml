@@ -47,10 +47,11 @@ env:
   ARM_USE_OIDC: true
   envName: "dev"
 jobs:
-  terraform-validate-plan:
+  terraform-plan:
     name: 'Terraform Validate and Plan'
     runs-on: ubuntu-latest
-    environment: dev #${{ inputs.environment }}
+    outputs:
+      tfplanExitCode: ${{ steps.tf-plan.outputs.exitcode }}
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     defaults:
       run:
@@ -141,13 +142,39 @@ jobs:
                 repo: context.repo.repo,
                 body: body
             })
+  terraform-apply:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    environment: dev #${{ inputs.environment }}
+    if: github.ref == 'refs/heads/main' && needs.terraform-plan.outputs.tfplanExitCode == 2
+    needs: [terraform-plan]
+
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/Azure/terraform-code
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+
+    # Download the saved plan artifacts
+    - name: 'Download Plan Artifacts'
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ env.what_resource }}-plan-${{ github.run_number }}
+    
+    # List all files
     - name: List files
       run: |
         pwd
         ls -lart
-      # On push to "main", build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    # - name: Terraform Apply
-    #   #if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
-    #   run: terraform apply -auto-approve -input=false ${{ env.what_resource }}-plan-${{ github.run_number }}
+      
+    # Terraform Apply 
+    - name: Terraform Apply
+      run: terraform apply -auto-approve -input=false ${{ env.what_resource }}-plan-${{ github.run_number }}
 
