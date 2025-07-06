@@ -77,11 +77,11 @@ jobs:
     - name: Terraform Format
       run: terraform fmt -check
       continue-on-error: true
-    
+
+    # Terraform Validate
     - name: Terraform Validate
       run: terraform validate -no-color
-    - name: List files
-      run: ls -lart
+    
     # Generates an execution plan for Terraform
     - name: Terraform Plan
       id: tf-plan
@@ -101,12 +101,17 @@ jobs:
         TF_VAR_clientId: "${{ secrets.AZURE_CLIENT_ID }}"
         TF_VAR_clientSecret: "${{ secrets.AZURE_CLIENT_SECRET }}"
         TF_VAR_tenant_id: "${{ secrets.AZURE_TENANT_ID }}"
+    # List files
+    - name: List files
+      run: ls -lart
+
+    #Upload Plan file into artifacts
     - name: Upload Artifacts
       if: github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.what_resource }}-plan-${{ github.run_number }}
-        path: ${{ github.workspace }}/${{ env.what_resource }}-plan-${{ github.run_number }}
+        path: ./${{ env.what_resource }}-plan-${{ github.run_number }}
         if-no-files-found: error
         include-hidden-files: true
     
