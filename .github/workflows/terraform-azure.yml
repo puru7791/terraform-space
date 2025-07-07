@@ -108,9 +108,8 @@ jobs:
       run: ls -lart
 
     #Upload Plan file into artifacts
-    - name: Upload Artifacts
-      if: github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'
-      #if: github.ref == 'refs/heads/main' && github.event.pull_request.merged == true
+    - name: Upload Artifacts    
+      if: github.ref == 'refs/heads/main'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.what_resource }}-plan-${{ github.run_number }}
