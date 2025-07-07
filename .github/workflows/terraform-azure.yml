@@ -172,6 +172,10 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
 
+    # Initilize the terraform 
+    - name: Terraform Init
+      run: terraform init -upgrade
+
     # Download the saved plan artifacts
     - name: 'Download Plan Artifacts'
       uses: actions/download-artifact@v4
@@ -183,7 +187,7 @@ jobs:
     - name: Display structure of all files
       run: |
         pwd
-        ls -R
+        tree
       
     # Terraform Apply 
     - name: Terraform Apply
