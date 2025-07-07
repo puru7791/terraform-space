@@ -12,5 +12,5 @@ location                = "East US"
 # disk_size_gb            = "20"
 
 # Variable for AKS Cluster 
-defaultPoolVm_size = "Standard_D2_v2"
+defaultPoolVm_size = "Standard_D2s_v6"
 
