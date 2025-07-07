@@ -37,6 +37,7 @@ resource "azurerm_kubernetes_cluster" "my-aks" {
     client_id = var.clientId
     client_secret = var.clientSecret
   }
+  local_account_disabled            = true
   azure_policy_enabled              = true
   role_based_access_control_enabled = true
   azure_active_directory_role_based_access_control {
