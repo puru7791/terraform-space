@@ -63,7 +63,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "linux-pool" {
   min_count             = 1
   max_count             = 2
   os_type               = "Linux" # Default is Linux, we can change to Windows
-  vm_size               = "Standard_D2_v2"
+  vm_size               = "Standard_D2s_v6" ## Supports zone[1,2,3]
   os_disk_size_gb       = 30
   mode                  = "User"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.my-aks.id
