@@ -46,6 +46,7 @@ env:
   ARM_TENANT_ID: "${{ secrets.AZURE_TENANT_ID }}"
   ARM_USE_OIDC: true
   envName: "dev"
+  TF_WORKING_DIR: ${{ github.workspace }}/Azure/terraform-code
 jobs:
   terraform-plan:
     name: 'Terraform Validate and Plan'
@@ -56,7 +57,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ${{ github.workspace }}/Azure/terraform-code
+        working-directory: ${{ env.TF_WORKING_DIR }}
     steps:
     # Checkout the repository to the GitHub Actions runner
     - name: Checkout
@@ -107,11 +108,11 @@ jobs:
 
     #Upload Plan file into artifacts
     - name: Upload Artifacts
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' && github.event.pull_request.merged == true
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.what_resource }}-plan-${{ github.run_number }}
-        path: ${{ github.workspace }}/Azure/terraform-code/${{ env.what_resource }}-plan-${{ github.run_number }}
+        path: ${{ env.TF_WORKING_DIR }}/${{ env.what_resource }}-plan-${{ github.run_number }}
         if-no-files-found: error
         include-hidden-files: true
         retention-days: 2
@@ -133,7 +134,7 @@ jobs:
         echo "</details>" >> $GITHUB_OUTPUT
         echo "${delimiter}" >> $GITHUB_OUTPUT
 
-    # If this is a PR post the changes
+    # If this is a PR, post the terraform plan output to Pull request's message
     - name: Push Terraform Output to PR
       if: github.ref != 'refs/heads/main'
       uses: actions/github-script@v7
@@ -158,7 +159,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ${{ github.workspace }}/Azure/terraform-code
+        working-directory: ${{ env.TF_WORKING_DIR }}
 
     steps:
     # Checkout the repository to the GitHub Actions runner
@@ -174,13 +175,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: ${{ env.what_resource }}-plan-${{ github.run_number }}
-        path: ${{ jobs.terraform-apply.defaults.run.working_directory }}
+        path: ${{ env.TF_WORKING_DIR }}
     
     # List all files
-    - name: List files
+    - name: Display structure of all files
       run: |
         pwd
-        ls -lart
+        ls -R
       
     # Terraform Apply 
     - name: Terraform Apply
