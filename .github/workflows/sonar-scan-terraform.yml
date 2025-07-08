@@ -1,0 +1,20 @@
+name: 'Scan the tf files with SonarQube'
+on: 
+  workflow_dispatch:
+jobs:
+  tf-scan-sonar:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout the code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v5.2.0
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: >
+          -Dsonar.organization=puru7791 # For SonarQube Cloud only
+          -Dsonar.projectKey=terraform-space
