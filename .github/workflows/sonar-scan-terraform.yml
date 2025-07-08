@@ -17,5 +17,5 @@ jobs:
         SONAR_HOST_URL: https://sonarcloud.io
       with:
         args: >
-          -Dsonar.organization=puru7791 # For SonarQube Cloud only
+          -Dsonar.organization=puru7791
           -Dsonar.projectKey=terraform-space
