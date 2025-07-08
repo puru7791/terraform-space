@@ -23,14 +23,14 @@ jobs:
       with:
         terraform_wrapper: false
     
+    # Terraform Initilize
+    - name: Terraform Initilize
+      run: terraform init -backend=false
+
     # Terraform validate
     - name: Terraform Validate
       run: terraform validate
 
-    # Terraform Initilize
-    - name: Terraform Initilize
-      run: terraform init -backend=false
-    
     # Security scan of the terraform code using checkov
     - name: Test with Checkov
       id: checkov
