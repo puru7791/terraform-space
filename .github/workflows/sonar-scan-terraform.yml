@@ -10,10 +10,11 @@ jobs:
       with:
         fetch-depth: 0
     - name: SonarQube Scan
-      uses: SonarSource/sonarqube-scan-action@v5.2.0
+      uses: SonarSource/sonarqube-scan-action@v5.0.0
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_HOST_URL: https://sonarcloud.io
       with:
         args: >
           -Dsonar.organization=puru7791 # For SonarQube Cloud only
