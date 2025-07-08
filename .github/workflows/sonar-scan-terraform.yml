@@ -3,10 +3,14 @@ on:
   workflow_dispatch:
 permissions:   
   security-events: write # Needed to upload-sarif
+  contents: read
 
 jobs:
   tf-scan-sonar:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/Azure/terraform-code
     steps:
     - name: Checkout the code
       uses: actions/checkout@v4
